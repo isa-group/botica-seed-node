@@ -1,7 +1,10 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-for /f "delims=" %%i in ('npm pkg get imageTag') do set IMAGE_TAG=%%i
+for /f "delims=" %%i in ('npm pkg get imageTag') do (
+    set IMAGE_TAG=%%i
+    set IMAGE_TAG=!IMAGE_TAG:"=!
+)
 
 echo Building Docker image with tag %IMAGE_TAG%...
 
