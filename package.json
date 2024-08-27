@@ -11,6 +11,6 @@
   },
   "license": "MIT",
   "dependencies": {
-    "botica-lib-node": "^1.0.1"
+    "botica-lib-node": "^0.0.2"
   }
 }
