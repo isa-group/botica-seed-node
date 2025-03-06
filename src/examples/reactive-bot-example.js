@@ -1,24 +1,45 @@
 import botica from "botica-lib-node";
-import { randomUUID } from "crypto";
+import {randomUUID} from "crypto";
 
 const bot = await botica();
 
-// Handles the reactive action for this bot. This method is triggered when an
-// order is received.
-bot.onOrderReceived(async (order, incomingMessage) => {
-  // Perform a long blocking task
-  const longBlockingTaskResult = await runLongBlockingTask(incomingMessage);
+// Listens for "echo" orders.
+//
+// This publishes a "handle_echo" order with the incoming message to any bot
+// subscribed to the "echo_handling" key.
+bot.onOrderReceived(async (message) => {
+  await bot.publishOrder(message, "echo_handling", "handle_echo");
+}, "echo");
 
-  // Publish the result using the key and order specified in the configuration file for this bot
-  await bot.publishOrder(longBlockingTaskResult);
+// Listens for the default order of this bot. This must be specified in the
+// configuration file when using this bot within a Botica environment.
+// If no default order is specified, an error will be thrown.
+bot.onOrderReceived(runBotAction);
 
-  // You can also publish a message with a custom key and order
-  await bot.publishOrder(longBlockingTaskResult, "my_key", "my_order");
-});
+// Listens for "run_bot_action" orders.
+bot.onOrderReceived(runBotAction, "run_bot_action");
 
-async function runLongBlockingTask(base) {
-  return new Promise(
-      (resolve) => setTimeout(() => resolve(base + randomUUID()), 5000));
-}
+// Listens for "shutdown" orders.
+bot.onOrderReceived(() => process.exit(), "shutdown");
 
 await bot.start();
+
+async function runBotAction(message) {
+  // Perform a long-blocking task.
+  const longBlockingTaskResult = await runLongBlockingTask(message);
+
+  // Publish the result using the default publish configuration of this bot.
+  // This must be specified in the configuration file when using this bot
+  // within a Botica environment.
+  // If no default publish configuration is specified, an error will be thrown.
+  await bot.publishOrder(longBlockingTaskResult);
+
+  // You can also publish a message with a custom key and order.
+  await bot.publishOrder(longBlockingTaskResult, "publish_key", "run_action");
+}
+
+async function runLongBlockingTask(base) {
+  return new Promise((resolve) =>
+      setTimeout(() => resolve(base + randomUUID()), 5000)
+  );
+}
