@@ -13,7 +13,7 @@ async function main() {
   // Handles incoming "process_data" orders.
   // Receives raw data, processes it, and publishes a structured result
   // for other bots to consume.
-  bot.onOrderReceived(async (rawData) => {
+  bot.on("process_data", async (rawData) => {
     console.log(`Received data for processing: ${rawData}`);
 
     // Process the data (simulate data transformation)
@@ -24,10 +24,10 @@ async function main() {
         "store_processed_data");
 
     console.log(`Processed data published: ${processedData}`);
-  }, "process_data");
+  });
 
   // Listens for "shutdown" orders.
-  bot.onOrderReceived(() => process.exit(), "shutdown");
+  bot.on("shutdown", () => process.exit());
 
   await bot.start();
 }
