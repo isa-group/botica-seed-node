@@ -3,7 +3,7 @@ import {randomUUID} from "crypto";
 
 /**
  * A proactive bot that periodically generates random data and publishes it using the "process_data"
- * order.
+ * action.
  *
  * This bot simulates a data producer, sending structured messages to be processed
  * by other bots in the Botica environment.
@@ -13,13 +13,13 @@ async function main() {
 
   // Periodically generates and publishes data for processing.
   // Runs at regular intervals, creating a new dataset and publishing it
-  // under the "process_data" order.
+  // under the "process_data" action.
   bot.proactive(async () => {
     // Generate random data
     const generatedData = generateRandomData();
 
-    // Publish the generated data with the "process_data" order
-    await bot.publishOrder(generatedData, "raw_data", "process_data");
+    // Publish the generated data with the "process_data" action and the "raw_data" key
+    await bot.publish("raw_data", "process_data", generatedData);
 
     console.log(`Published new generated data: ${generatedData}`);
   });

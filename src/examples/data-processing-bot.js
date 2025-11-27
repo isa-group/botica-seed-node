@@ -4,13 +4,13 @@ import {randomUUID} from "crypto";
 /**
  * A reactive bot that processes incoming data and publishes the results.
  *
- * This bot listens for the "process_data" order. When it receives a message,
+ * This bot listens for orders with "process_data" action. When it receives an order,
  * it performs a simulated data transformation and publishes the processed result.
  */
 async function main() {
   const bot = await botica();
 
-  // Handles incoming "process_data" orders.
+  // Handles incoming orders with "process_data" action.
   // Receives raw data, processes it, and publishes a structured result
   // for other bots to consume.
   bot.on("process_data", async (rawData) => {
@@ -20,14 +20,22 @@ async function main() {
     const processedData = processData(rawData);
 
     // Publish the result
-    await bot.publishOrder(processedData, "processed_data",
-        "store_processed_data");
+    await bot.publishOrder("processed_data",
+        "store_processed_data", processedData);
 
     console.log(`Processed data published: ${processedData}`);
   });
 
-  // Listens for "shutdown" orders.
-  bot.on("shutdown", () => process.exit());
+  // Example shutdown handler
+  bot.shutdownHandler.onShutdownRequest((req, res) => {
+    if (req.isForced || !isProcessingData()) {
+      saveData();
+      res.setCanceled(true);
+      return;
+    }
+
+    res.setCanceled(true);
+  })
 
   await bot.start();
 }
@@ -47,6 +55,14 @@ function processData(inputData) {
     processed: inputData,
     id: randomUUID()
   };
+}
+
+function isProcessingData() {
+  return false;
+}
+
+function saveData() {
+  // ...
 }
 
 main().catch(console.error);
