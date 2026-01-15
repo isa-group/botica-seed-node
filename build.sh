@@ -1,5 +1,8 @@
 #!/bin/bash
 
+SCRIPT_DIR=$(dirname "$0")
+cd "$SCRIPT_DIR" || exit 1
+
 IMAGE_TAG=$(npm pkg get imageTag | tr -d '"')
 
 echo "Building Docker image with tag $IMAGE_TAG..."
